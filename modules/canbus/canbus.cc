@@ -24,6 +24,9 @@
 #include "modules/common/util/util.h"
 #include "modules/drivers/canbus/can_client/can_client_factory.h"
 
+// #include "ros/ros.h" //
+// #include<iostream>   //
+
 namespace apollo {
 namespace canbus {
 
@@ -42,7 +45,7 @@ Status Canbus::Init() {
   AINFO << "The adapter manager is successfully initialized.";
 
   // load conf
-  if (!common::util::GetProtoFromFile(FLAGS_canbus_conf_file, &canbus_conf_)) {
+  if (!common::util::GetProtoFromFile(FLAGS_canbus_conf_file, &canbus_conf_)) {  //根据canbus_conf_加载proto
     return OnError("Unable to load canbus conf file: " +
                    FLAGS_canbus_conf_file);
   }
@@ -51,9 +54,9 @@ Status Canbus::Init() {
   ADEBUG << "Canbus_conf:" << canbus_conf_.ShortDebugString();
 
   // Init can client
-  auto *can_factory = CanClientFactory::instance();
+  auto *can_factory = CanClientFactory::instance();  //语法上怎么使用？
   can_factory->RegisterCanClients();
-  can_client_ = can_factory->CreateCANClient(canbus_conf_.can_card_parameter());
+  can_client_ = can_factory->CreateCANClient(canbus_conf_.can_card_parameter());  //esd can card 加载
   if (!can_client_) {
     return OnError("Failed to create can client.");
   }
@@ -62,31 +65,31 @@ Status Canbus::Init() {
   VehicleFactory vehicle_factory;
   vehicle_factory.RegisterVehicleFactory();
   auto vehicle_object =
-      vehicle_factory.CreateVehicle(canbus_conf_.vehicle_parameter());
+      vehicle_factory.CreateVehicle(canbus_conf_.vehicle_parameter());  // ch 车辆加载
   if (!vehicle_object) {
     return OnError("Failed to create vehicle:");
   }
 
-  message_manager_ = vehicle_object->CreateMessageManager();
+  message_manager_ = vehicle_object->CreateMessageManager();     // 管理can总线消息
   if (message_manager_ == nullptr) {
     return OnError("Failed to create message manager.");
   }
   AINFO << "Message manager is successfully created.";
 
-  if (can_receiver_.Init(can_client_.get(), message_manager_.get(),
-                         canbus_conf_.enable_receiver_log()) != ErrorCode::OK) {
+  if (can_receiver_.Init(can_client_.get(), message_manager_.get(),  //can消息接收者初始化
+                         canbus_conf_.enable_receiver_log()) != ErrorCode::OK) {  
     return OnError("Failed to init can receiver.");
   }
   AINFO << "The can receiver is successfully initialized.";
 
-  if (can_sender_.Init(can_client_.get(), canbus_conf_.enable_sender_log()) !=
+  if (can_sender_.Init(can_client_.get(), canbus_conf_.enable_sender_log()) !=  //can消息发布者初始化
       ErrorCode::OK) {
     return OnError("Failed to init can sender.");
   }
   AINFO << "The can sender is successfully initialized.";
 
-  vehicle_controller_ = vehicle_object->CreateVehicleController();
-  if (vehicle_controller_ == nullptr) {
+  vehicle_controller_ = vehicle_object->CreateVehicleController();      //创建vehicle_controller_
+  if (vehicle_controller_ == nullptr) {                                 //与controlcommand有关
     return OnError("Failed to create vehicle controller.");
   }
   AINFO << "The vehicle controller is successfully created.";
@@ -97,17 +100,19 @@ Status Canbus::Init() {
   }
   AINFO << "The vehicle controller is successfully initialized.";
 
-  CHECK(AdapterManager::GetControlCommand()) << "Control is not initialized.";
+  CHECK(AdapterManager::GetControlCommand()) << "Control is not initialized."; // 如果函数返回失败值 记录错误信息
   CHECK(AdapterManager::GetGuardian()) << "Guardian is not initialized.";
   // TODO(QiL) : depreacte this
   if (!FLAGS_receive_guardian) {
-    AdapterManager::AddControlCommandCallback(&Canbus::OnControlCommand, this);
+    AdapterManager::AddControlCommandCallback(&Canbus::OnControlCommand, this);   //调取控制命令
   } else {
     AdapterManager::AddGuardianCallback(&Canbus::OnGuardianCommand, this);
   }
 
   return Status::OK();
 }
+
+/*init done*/
 
 Status Canbus::Start() {
   // 1. init and start the can card hardware
@@ -147,7 +152,7 @@ Status Canbus::Start() {
 void Canbus::PublishChassis() {
   Chassis chassis = vehicle_controller_->chassis();
   AdapterManager::FillChassisHeader(FLAGS_canbus_node_name, &chassis);
-
+  
   AdapterManager::PublishChassis(chassis);
   ADEBUG << chassis.ShortDebugString();
 }

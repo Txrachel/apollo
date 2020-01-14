@@ -108,7 +108,7 @@ namespace adapter {
   }                                                                            \
                                                                                \
  private:                                                                      \
-  std::unique_ptr<name##Adapter> name##_;                                      \
+  std::unique_ptr<name##Adapter> name##_;                                      \ //查找name##Adapter？
   ros::Publisher name##publisher_;                                             \
   ros::Subscriber name##subscriber_;                                           \
   AdapterConfig name##config_;                                                 \
@@ -116,15 +116,15 @@ namespace adapter {
   void InternalEnable##name(const std::string &topic_name,                     \
                             const AdapterConfig &config) {                     \
     name##_.reset(                                                             \
-        new name##Adapter(#name, topic_name, config.message_history_limit())); \
-    if (config.mode() != AdapterConfig::PUBLISH_ONLY && IsRos()) {             \
+        new name##Adapter(#name, topic_name, config.message_history_limit())); \  //unique_ptr
+    if (config.mode() != AdapterConfig::PUBLISH_ONLY && IsRos()) {             \  //的reset函数功能？
       name##subscriber_ =                                                      \
           node_handle_->subscribe(topic_name, config.message_history_limit(),  \
-                                  &name##Adapter::RosCallback, name##_.get()); \
-    }                                                                          \
+                                  &name##Adapter::RosCallback, name##_.get()); \ //第四个参数
+    }                                                                          \  //的含义？
     if (config.mode() != AdapterConfig::RECEIVE_ONLY && IsRos()) {             \
       name##publisher_ = node_handle_->advertise<name##Adapter::DataType>(     \
-          topic_name, config.message_history_limit(), config.latch());         \
+          topic_name, config.message_history_limit(), config.latch());         \ //参数latch？
     }                                                                          \
                                                                                \
     observers_.push_back([this]() { name##_->Observe(); });                    \
@@ -237,7 +237,7 @@ class AdapterManager {
 
   /// Observe() callbacks that will be used to to call the Observe()
   /// of enabled adapters.
-  std::vector<std::function<void()>> observers_;
+  std::vector<std::function<void()>> observers_;   //std::function<void() 此类型的作用
 
   bool initialized_ = false;
 

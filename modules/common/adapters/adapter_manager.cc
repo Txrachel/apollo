@@ -26,7 +26,7 @@ namespace adapter {
 AdapterManager::AdapterManager() {}
 
 void AdapterManager::Observe() {
-  for (const auto observe : instance()->observers_) {
+  for (const auto observe : instance()->observers_) {  //instance作用
     observe();
   }
 }

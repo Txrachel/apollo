@@ -105,7 +105,7 @@ ErrorCode VehicleController::Update(const ControlCommand &command) {
     AINFO << "Canbus received pad msg: "
           << control_command.pad_msg().ShortDebugString();
     Chassis::DrivingMode mode = Chassis::COMPLETE_MANUAL;
-    switch (control_command.pad_msg().action()) {
+    switch (control_command.pad_msg().action()) {    //具体逻辑？
       case control::DrivingAction::START: {
         mode = Chassis::COMPLETE_AUTO_DRIVE;
         break;

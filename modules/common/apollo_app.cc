@@ -60,7 +60,7 @@ int ApolloApp::Spin() {
     return -1;
   }
 
-  std::unique_ptr<ros::AsyncSpinner> spinner;
+  std::unique_ptr<ros::AsyncSpinner> spinner;  //spinner作用？
   if (callback_thread_num_ > 1) {
     spinner = std::unique_ptr<ros::AsyncSpinner>(
         new ros::AsyncSpinner(callback_thread_num_));
@@ -71,7 +71,7 @@ int ApolloApp::Spin() {
     AERROR << Name() << " Start failed: " << status;
     return -2;
   }
-  ExportFlags();
+  ExportFlags();  //输出flags
   if (spinner) {
     spinner->start();
   } else {

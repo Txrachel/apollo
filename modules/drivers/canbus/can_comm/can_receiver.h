@@ -108,7 +108,7 @@ class CanReceiver {
   DISALLOW_COPY_AND_ASSIGN(CanReceiver);
 };
 
-template <typename SensorType>
+template <typename SensorType>  //用法 与 template <Class T> 相似？
 ::apollo::common::ErrorCode CanReceiver<SensorType>::Init(
     CanClient *can_client, MessageManager<SensorType> *pt_manager,
     bool enable_log) {
@@ -130,20 +130,20 @@ template <typename SensorType>
 template <typename SensorType>
 void CanReceiver<SensorType>::RecvThreadFunc() {
   AINFO << "Can client receiver thread starts.";
-  CHECK_NOTNULL(can_client_);
-  CHECK_NOTNULL(pt_manager_);
+  CHECK_NOTNULL(can_client_); //esd_can_card
+  CHECK_NOTNULL(pt_manager_); //message_manager
 
   int32_t receive_error_count = 0;
   int32_t receive_none_count = 0;
   const int32_t ERROR_COUNT_MAX = 10;
-  std::chrono::duration<double, std::micro> default_period{10 * 1000};
+  std::chrono::duration<double, std::micro> default_period{10 * 1000};  //
 
   while (IsRunning()) {
     std::vector<CanFrame> buf;
     int32_t frame_num = MAX_CAN_RECV_FRAME_LEN;
-    if (can_client_->Receive(&buf, &frame_num) !=
+    if (can_client_->Receive(&buf, &frame_num) != //接收
         ::apollo::common::ErrorCode::OK) {
-      LOG_IF_EVERY_N(ERROR, receive_error_count++ > ERROR_COUNT_MAX,
+      LOG_IF_EVERY_N(ERROR, receive_error_count++ > ERROR_COUNT_MAX,  //记录错误信息
                      ERROR_COUNT_MAX)
           << "Received " << receive_error_count << " error messages.";
       std::this_thread::sleep_for(default_period);
@@ -166,16 +166,16 @@ void CanReceiver<SensorType>::RecvThreadFunc() {
     }
     receive_none_count = 0;
 
-    for (const auto &frame : buf) {
+    for (const auto &frame : buf) {          
       uint8_t len = frame.len;
       uint32_t uid = frame.id;
       const uint8_t *data = frame.data;
-      pt_manager_->Parse(uid, data, len);
+      pt_manager_->Parse(uid, data, len);    //messagemanager解析消息
       if (enable_log_) {
         ADEBUG << "recv_can_frame#" << frame.CanFrameString();
       }
     }
-    std::this_thread::yield();
+    std::this_thread::yield();  //功能？
   }
   AINFO << "Can client receiver thread stopped.";
 }
@@ -192,7 +192,7 @@ template <typename SensorType>
   }
   is_running_ = true;
 
-  thread_.reset(new std::thread([this] { RecvThreadFunc(); }));
+  thread_.reset(new std::thread([this] { RecvThreadFunc(); })); //主要功能实现语句
   if (thread_ == nullptr) {
     AERROR << "Unable to create can client receiver thread.";
     return ::apollo::common::ErrorCode::CANBUS_ERROR;

@@ -41,6 +41,9 @@
 #include "modules/drivers/canbus/proto/can_card_parameter.pb.h"
 #include "modules/guardian/proto/guardian.pb.h"
 
+#include"ros/ros.h"
+#include"MyChassisInfo.h"
+
 /**
  * @namespace apollo::canbus
  * @brief apollo::canbus
@@ -103,6 +106,7 @@ class Canbus : public apollo::common::ApolloApp {
   int64_t last_timestamp_ = 0;
   ros::Timer timer_;
   apollo::common::monitor::MonitorLogger monitor_logger_;
+  
 };
 
 }  // namespace canbus

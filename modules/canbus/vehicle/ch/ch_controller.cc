@@ -506,9 +506,9 @@ void ChController::SecurityDogThreadFunc() {
     }
     end = ::apollo::common::time::AsInt64<::apollo::common::time::micros>(
         ::apollo::common::time::Clock::Now());
-    std::chrono::duration<double, std::micro> elapsed{end - start};
+    std::chrono::duration<double, std::micro> elapsed{end - start};    //记录check状态需要花费的总时间
     if (elapsed < default_period) {
-      std::this_thread::sleep_for(default_period - elapsed);
+      std::this_thread::sleep_for(default_period - elapsed);           //等待一段时间 为什么呢？避免消息太多而堵塞？
     } else {
       AERROR << "Too much time consumption in ChController looping process:"
              << elapsed.count();

@@ -161,7 +161,10 @@ class VehicleController {
  protected:
   canbus::VehicleParameter params_;
   common::VehicleParam vehicle_params_;
-  CanSender<::apollo::canbus::ChassisDetail> *can_sender_ = nullptr;
+  
+  
+  
+  <::apollo::canbus::ChassisDetail> *can_sender_ = nullptr;
   MessageManager<::apollo::canbus::ChassisDetail> *message_manager_ = nullptr;
   bool is_initialized_ = false;  // own by derviative concrete controller
   Chassis::DrivingMode driving_mode_ = Chassis::COMPLETE_MANUAL;

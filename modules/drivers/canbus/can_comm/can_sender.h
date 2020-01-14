@@ -195,7 +195,7 @@ class CanSender {
   bool is_running_ = false;
 
   CanClient *can_client_ = nullptr;  // Owned by global canbus.cc
-  std::vector<SenderMessage<SensorType>> send_messages_;
+  std::vector<SenderMessage<SensorType>> send_messages_;   //即将被发送的信息
   std::unique_ptr<std::thread> thread_;
   bool enable_log_ = false;
 
@@ -216,7 +216,7 @@ template <typename SensorType>
 SenderMessage<SensorType>::SenderMessage(
     const uint32_t message_id, ProtocolData<SensorType> *protocol_data,
     bool init_with_one)
-    : message_id_(message_id), protocol_data_(protocol_data) {
+    : message_id_(message_id), protocol_data_(protocol_data) {    //一个: 的作用是？？
   if (init_with_one) {
     for (int32_t i = 0; i < protocol_data->GetLength(); ++i) {
       can_frame_to_update_.data[i] = 0xFF;
@@ -249,7 +249,7 @@ void SenderMessage<SensorType>::Update() {
   }
   protocol_data_->UpdateData(can_frame_to_update_.data);
 
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);  //在这里加上锁的作用是保证 哪一句语句有充分的时间执行？
   can_frame_to_send_ = can_frame_to_update_;
 }
 
@@ -273,8 +273,8 @@ template <typename SensorType>
 void CanSender<SensorType>::PowerSendThreadFunc() {
   CHECK_NOTNULL(can_client_);
   sched_param sch;
-  sch.sched_priority = 99;
-  pthread_setschedparam(pthread_self(), SCHED_FIFO, &sch);
+  sch.sched_priority = 99;  //设置成99的含义是什么？
+  pthread_setschedparam(pthread_self(), SCHED_FIFO, &sch); //语句含义？
 
   const int32_t INIT_PERIOD = 5000;  // 5ms
   int32_t delta_period = INIT_PERIOD;
@@ -291,10 +291,10 @@ void CanSender<SensorType>::PowerSendThreadFunc() {
         common::time::Clock::Now());
     new_delta_period = INIT_PERIOD;
 
-    for (auto &message : send_messages_) {
+    for (auto &message : send_messages_) {   //发送消息的 功能实现语句
       bool need_send = NeedSend(message, delta_period);
       message.UpdateCurrPeriod(delta_period);
-      new_delta_period = std::min(new_delta_period, message.curr_period());
+      new_delta_period = std::min(new_delta_period, message.curr_period()); //间隔时间？
 
       if (!need_send) {
         continue;
@@ -308,7 +308,7 @@ void CanSender<SensorType>::PowerSendThreadFunc() {
       if (enable_log()) {
         ADEBUG << "send_can_frame#" << can_frame.CanFrameString();
       }
-    }
+    }                                     //结束
     delta_period = new_delta_period;
     tm_end = common::time::AsInt64<common::time::micros>(
         common::time::Clock::Now());
@@ -362,7 +362,7 @@ common::ErrorCode CanSender<SensorType>::Start() {
     return common::ErrorCode::CANBUS_ERROR;
   }
   is_running_ = true;
-  thread_.reset(new std::thread([this] { PowerSendThreadFunc(); }));
+  thread_.reset(new std::thread([this] { PowerSendThreadFunc(); })); //功能实现语句
 
   return common::ErrorCode::OK;
 }

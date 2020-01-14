@@ -201,7 +201,7 @@ class Adapter : public AdapterBase {
    * @param message the input data.
    */
   void OnReceive(const D& message) {
-    RosCallback(boost::make_shared<D const>(message));
+    RosCallback(boost::make_shared<D const>(message)); //boost?
   }
 
   /**
